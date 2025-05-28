@@ -1,0 +1,102 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+Objective:
+----------
+Minimize the total number of visitors who leave due to full queues.
+
+Problem Description:
+--------------------
+We have an amusement park with 7 attractions. Each attraction:
+1) Receives visitors according to a Poisson process with rate = 1 (visitors/minute).
+2) Has a single server (the ride), where only one visitor can be served at a time.
+3) Has a finite queue capacity c_i. If a new visitor arrives and the queue is full, that visitor immediately departs the park.
+
+When a visitor finishes at an attraction:
+- The visitor departs the park with probability 0.2.
+- Otherwise, the visitor transitions to another attraction according to the following 7x7 transition matrix (each row sums to 1):
+  [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.0]
+  [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.0]
+  [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.0]
+  [0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.0]
+  [0.1, 0.1, 0.1, 0.1, 0.0, 0.1, 0.3]
+  [0.1, 0.1, 0.1, 0.1, 0.1, 0.0, 0.3]
+  [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2]
+
+Service times at each attraction follow an Erlang distribution (shape k=2, scale = 1/9). Equivalently, it's the sum of two independent exponentials with mean 1/9 each. The park is open for 480 minutes (8 hours). When the park closes, anyone still in a queue immediately departs and is counted as departed.
+
+Model Factors (Defaults):
+-------------------------
+- park_capacity = 350   (Total capacity to be distributed across the 7 queues)
+- queue_capacities = [50, 50, 50, 50, 50, 50, 50] (starting solution, summing to 350)
+- time_open = 480  (minutes in the day)
+- erlang_shape = [2,2,2,2,2,2,2]
+- erlang_scale = [1/9,1/9,1/9,1/9,1/9,1/9,1/9]
+- depart_probabilities = [0.2,0.2,0.2,0.2,0.2,0.2,0.2]
+- arrival_rates = [1,1,1,1,1,1,1]
+- transition_probabilities (given above)
+- number_attractions = 7
+- budget (e.g., 1000)
+
+Responses:
+----------
+- total_departed: Total visitors who leave immediately due to a full queue.
+- percent_departed: % of arrivals who depart for that reason.
+- average_number_in_system: Time average of the number of visitors currently in rides or queues.
+- attraction_utilization_percentages: Percentage utilization of each of the 7 rides.
+
+Requirements:
+-------------
+1) Analytical / Closed-Form Approach
+   - If you can devise or approximate an analytical formula for queue capacities that minimize total departures, outline your derivation and assumptions.
+
+2) Simulation-Based Approach
+   - If no closed-form solution is feasible, build a simulation:
+     * Generate arrivals for each attraction (Poisson with rate=1).
+     * Use an Erlang(2, 1/9) distribution for each ride's service time.
+     * Implement the Markovian visitor transition logic (the matrix) with 0.2 chance of departing the park.
+     * Track how many visitors depart instantly due to full queues.
+     * Summation of queue_capacities must be 350, and each capacity must be >= 0.
+   - You have a maximum [BUDGET] (e.g., 1000) objective function evaluations/replications.
+   - If you provide code, put it in one fenced block:
+
+       ```python
+       # ... code ...
+       ```
+
+   - This code should clearly show how you simulate arrivals, service times, transitions, queue logic, etc.
+
+3) Performance Measures & Validation
+   - Report total_departed and/or percent_departed for your proposed capacities.
+   - Compare to the baseline [50,50,50,50,50,50,50] to demonstrate any improvement.
+
+Deliverables:
+-------------
+1) Solution Explanation
+   - State your reasoning for choosing particular queue capacities.
+   - If closed-form, explain the mathematics. If simulation, describe your search or optimization strategy.
+
+2) If Submitting Code
+   - Single fenced code block with standard libraries (random, numpy, etc.).
+   - Show how arrivals, services, queueing, and transitions are handled.
+
+3) Results
+   - Final recommended capacities: e.g. [60, 48, 52, 49, 55, 47, 39].
+   - Provide numeric performance: total_departed, percent_departed, utilization, confidence intervals (if relevant).
+
+Testing Notes:
+-------------
+- We will test your solution with budgets: 100, 500, 1000.
+- We may also slightly alter arrival rates or park capacity to see how robust your solution is.
+- Simulations should run within feasible time for these budgets.
+
+Success Criteria:
+----------------
+1) Outperform the baseline capacity distribution (50 each).
+2) Ensure simulation or analysis is statistically valid, with confidence intervals if possible.
+3) Keep total_departed as low as possible while respecting sum of capacities = 350.
+
+Final Instructions:
+------------------
+- Do not reveal any known best solution; none is given.
+- Your objective is to minimize total departures, either via an analytical approach or a simulation-based search.
+- If using code, ensure it is clearly commented and able to run in reasonable time for 8-hour (480-minute) operation.

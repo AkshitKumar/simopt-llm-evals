@@ -1,0 +1,111 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+--------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+--------------------------------------------------------------------------------
+We have a food supply chain consisting of n stages. At each stage i (i = 1, 2, ..., n):
+- The fraction of food that becomes contaminated increases randomly according to a growth rate Lambda_i, 0 <= Lambda_i <= 1.
+- Optionally, a prevention effort can be applied, which reduces contamination by a random fraction Gamma_i, 0 <= Gamma_i <= 1, at a cost c_i.
+- The variable u_i (decision variable) represents how much prevention is applied at stage i.
+
+  * In one version (Version A), u_i is restricted to be binary (0 or 1).
+  * In another version (Version B), u_i may take any value in the interval [0, 1].
+
+Both Lambda_i and Gamma_i are drawn from Beta distributions with known parameters:
+- Lambda_i ~ Beta( contam_rate_alpha, contam_rate_beta ), default Beta(1.0, 17/3).
+- Gamma_i  ~ Beta( restore_rate_alpha, restore_rate_beta ), default Beta(1.0, 3/7).
+
+Additionally, the initial contaminated fraction (call it X_0) is drawn from Beta( initial_rate_alpha, initial_rate_beta ), default Beta(1.0, 30.0).  
+
+At each stage i, after random contamination growth (Lambda_i) is applied and any chosen prevention effort (Gamma_i) is applied, the fraction X_i of food contaminated emerges. If no prevention is applied at stage i (or u_i = 0 in the binary case, or 0.0 in the continuous case), only the contamination growth applies. If prevention is applied, we reduce contamination by a fraction Gamma_i (though the final contamination cannot be negative).
+
+--------------------------------------------------------------------------------
+OPTIMIZATION OBJECTIVE
+--------------------------------------------------------------------------------
+We want to minimize the total (deterministic) cost of prevention:
+   Cost = sum over i of ( c_i * u_i ).
+
+We must also ensure that, at each stage i, the probability of exceeding a contamination threshold p_i is at most epsilon_i (i.e., P(X_i > p_i) <= epsilon_i).
+
+Thus, the constraints are:
+0. Update contraints: X_i  = Lambda_i * (1 - u_i) * (1 - X_{i - 1}) + (1 - Gamma_i * u_i) * X_{i - 1} 
+1. Probability constraints: For each stage i, P(X_i <= p_i) >= 1 - epsilon_i.
+2. Either:
+   - Version A (binary decisions): Each u_i in {0, 1}
+   - Version B (continuous decisions): Each u_i in [0, 1]
+
+Default parameter values:
+- n (stages): 5
+- c_i (costs): [1, 1, 1, 1, 1]
+- p_i (thresholds): [0.1, 0.1, 0.1, 0.1, 0.1]
+- epsilon_i (error probability allowances): [0.2, 0.2, 0.2, 0.2, 0.2]
+- budget (max replications/evaluations allowed): 10000
+- Starting solution: (1, 1, 1, 1, 1) for either version.
+- Random solution generation:
+  * Version A: Each u_i ~ Bernoulli(0.5)
+  * Version B: Each u_i ~ Uniform(0,1)
+
+--------------------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------------------
+1. Analytical / Closed-Form Approach
+   - If you identify a method to analytically solve or approximate the constraints P(X_i <= p_i) >= 1 - epsilon_i, explain your derivation.
+
+2. Simulation-Based Approach
+   - If no closed-form solution is evident or to validate your approach, build a simulation that:
+     * Generates the random contamination growth (Lambda_i) and prevention effect (Gamma_i).
+     * Evaluates whether each stage meets the constraint P(X_i <= p_i) >= 1 - epsilon_i.
+     * Estimates total cost = sum(c_i * u_i).
+   - You have a budget [BUDGET] (e.g., 10000) for the number of replications or evaluations.
+   - If you provide code, please enclose it in **one single fenced code block** as follows:
+       ```python
+       # ...your code...
+       ```
+     so that it can be extracted automatically. The code should:
+       * Generate contamination rates, apply prevention, and track contamination levels across stages.
+       * Check or estimate the probability constraints.
+       * Optimize the decision vector u (either binary or continuous), minimizing cost.
+
+3. Performance Measures & Validation
+   - If simulating, estimate relevant probabilities and confirm they do not exceed the stated thresholds p_i more than epsilon_i of the time.
+   - Compare any proposed solution to a baseline, such as no prevention (u_i=0) or full prevention (u_i=1), to demonstrate improvement.
+
+--------------------------------------------------------------------------------
+DELIVERABLES
+--------------------------------------------------------------------------------
+1. Explanation of Methods
+   - Clearly outline how you approach the constraints and the objective.
+   - Distinguish between Version A (binary) and Version B (continuous) if applicable.
+
+2. If Submitting Code
+   - Provide a single Python code block:
+       ```python
+       # code here
+       ```
+   - Ensure it runs without specialized external dependencies (use standard libraries or at most numpy, random, etc.).
+   - Show how contamination is computed for each stage, how prevention is applied, and how you evaluate the probability constraints within the budget [BUDGET].
+
+3. Results & Recommendations
+   - Present a feasible solution (decision vector u).
+   - Report cost, plus estimates or theoretical values that show P(X_i <= p_i) >= 1 - epsilon_i is satisfied.
+
+--------------------------------------------------------------------------------
+TESTING NOTES
+--------------------------------------------------------------------------------
+- We will test your solution with different budgets like 1000, 5000, 10000.
+- We will also vary the random seeds to see if the solution remains robust.
+- Your approach may be purely simulation-based or a hybrid with some analytical handling of Beta distributions.
+
+--------------------------------------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------------------------------------
+1. Feasibility: The contamination threshold constraints are satisfied with the required probability in each stage.
+2. Cost Reduction: The prevention cost is smaller than trivial solutions (e.g., full or zero prevention).
+3. Justification: Explanation or numerical evidence for why your proposed prevention strategy works.
+
+--------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+--------------------------------------------------------------------------------
+- You may solve either or both versions (binary or continuous).
+- If you implement a simulation, state your assumptions, and ensure the code is neatly commented.
+- Provide any relevant mathematical or statistical derivations if you find a more direct solution strategy.

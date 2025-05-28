@@ -1,0 +1,96 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+--------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+--------------------------------------------------------------------------------
+A retailer sells n substitutable products, indexed by j = 1, 2, ..., n, each with its own price p^j and cost c^j. We denote the initial inventory levels by x = (x_1, ..., x_n).
+
+Customers arrive in sequence (t = 1, 2, ..., T). Each customer t sees which products are currently in stock and chooses exactly one product (or a no-purchase option) based on their utility vector. A product j is available if x^j_t > 0 at the time customer t arrives. If none are in stock, the customer either purchases nothing or leaves.
+
+The random utility vector U_t = (U^0_t, U^1_t, ..., U^n_t) follows a Multinomial Logit (MNL) model, meaning:
+- U^j_t = u^j + epsilon^j_t, with j=0 representing the "no-purchase" option (which has utility U^0_t = 0 for convenience).
+- Each epsilon^j_t is an independent Gumbel-distributed random variable (with parameter mu, possibly 1.0). 
+
+The retailer's profit is determined by:
+- Revenue from sold units: p^j for each unit of product j sold.
+- Cost incurred for each unit in initial inventory: c^j per unit of product j.
+- Unused inventory does not yield revenue at the end; the problem is just a one-period setting.
+
+We aim to choose the initial inventory level x = (x_1, ..., x_n) to maximize expected profit. Each x_j >= 0.
+
+--------------------------------------------------------------------------------
+MODEL FACTORS (with default values)
+--------------------------------------------------------------------------------
+- num_prod = 10
+- num_customer = 30
+- linearly increasing utilities (u^j = 5 + j)
+- mu = 1.0                # Parameter for the Gumbel distribution
+- init_level = (3, 3, ..., 3)     # Starting guess for initial inventory
+- price = (9, 9, ..., 9)
+- cost = (5, 5, ..., 5)
+
+--------------------------------------------------------------------------------
+OBJECTIVE
+--------------------------------------------------------------------------------
+Maximize expected profit = E[ sum_{sold items} (price_j - cost_j) ] subject to x_j >= 0 for all j.
+
+--------------------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------------------
+1. Analytical / Closed-Form Approach
+   - If you identify a method to analyze the MNL substitution dynamics and derive an optimal x, outline your reasoning.
+   - Provide assumptions or approximations.
+
+2. Simulation-Based Approach
+   - If a closed-form approach is difficult, develop a simulation:
+     * Generate T customers (T could be random or fixed).
+     * For each customer, sample their Gumbel random utilities epsilon^j_t and add to the base utilities u^j.
+     * Determine which products are in stock; the customer chooses the in-stock product j that maximizes U^j_t, or else chooses no purchase if that utility is highest.
+     * Decrement inventory for the chosen product.
+     * Track revenue and leftover inventory cost.
+     * Estimate average profit over many replications.
+   - You have a budget of [BUDGET] (e.g., 1000) evaluations/replications.
+   - If providing code, enclose it in one fenced code block:
+       ```python
+       # ...code...
+       ```
+     so it can be extracted by regex.
+   - Show how you vary x (the initial inventory vector) or use an optimization approach within the budget to find a profitable choice.
+
+3. Performance Measures & Validation
+   - If simulating, estimate average profit and, if possible, give confidence intervals.
+   - Compare your final solution to a baseline (like x=0 or a fixed guess) to demonstrate improvement.
+
+--------------------------------------------------------------------------------
+DELIVERABLES
+--------------------------------------------------------------------------------
+1. Method Explanation
+   - Whether you use a closed-form approach or simulation-based approach, explain how you search for or derive x.
+
+2. Code (if applicable)
+   - Provide a single code block with standard Python libraries only.
+   - Demonstrate how you implement the MNL choice logic, track inventory, compute revenues, etc.
+
+3. Results
+   - Propose an initial inventory vector x.
+   - Report the resulting expected profit or an estimate thereof.
+
+--------------------------------------------------------------------------------
+TESTING NOTES
+--------------------------------------------------------------------------------
+- We may test your approach with a small number of products (n=2) and a small number of customers (T=5), or a larger setting with n=10, T=30.
+- We'll vary the random seed to ensure your results are robust.
+- If you rely on simulation, stay within [BUDGET] replications for exploring candidate solutions.
+
+--------------------------------------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------------------------------------
+1. Feasibility: x_j >= 0 for each j.
+2. Profit Improvement: The resulting expected profit is better than trivial solutions like x=0.
+3. Justification: Provide numerical evidence or derivations for why your chosen x is near-optimal.
+
+--------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+--------------------------------------------------------------------------------
+- If simulating, describe your approach and show some results (like mean profit and variance).
+- If you find a near-analytical or approximate approach, clearly state assumptions and steps.

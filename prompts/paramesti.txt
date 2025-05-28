@@ -1,0 +1,90 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+Objective:
+----------
+Estimate the unknown parameter vector of a two-dimensional gamma distribution using maximum likelihood estimation.
+
+Problem Description:
+--------------------
+A simulation generates i.i.d. observations Y_j = (y_{1,j}, y_{2,j}) from a two-dimensional gamma distribution defined over [0, infinity) x [0, infinity). The density function is given by
+
+    f(y_1, y_2; x*) = (exp(-y_1) * y_1^(x*_1 * y_2 - 1)) / Gamma(x*_1 * y_2) *
+                       (exp(-y_2) * y_2^(x*_2 - 1)) / Gamma(x*_2),
+    for y_1, y_2 > 0,
+
+where the true parameter vector x* = (x*_1, x*_2) is unknown. The function
+
+    g(x) = E[ log( f(Y; x) ) ] = integral_0^infinity log( f(y; x) ) * f(y; x*) dy
+
+is maximized by x*, and its sample estimator
+
+    G_m(x) = (1/m) * sum_(j=1)^m log( f(Y_j; x) )
+
+is consistent. In this context, each component of Y_j is a gamma random variable, and the goal is to recover x* through optimization.
+
+Given Model Factors (defaults in parentheses):
+----------------------------------------------
+- True Parameters (x*): The unknown parameter vector that maximizes the expected log likelihood.
+  Default: [2, 5]
+
+- Parameter Guess (x): The decision variable used in the log likelihood evaluation.
+  Starting value: [1, 1]
+
+Randomness Sources:
+-------------------
+- The observation vector Y = (y_1, y_2) is random, with both y_1 and y_2 being gamma-distributed.
+
+Requirements:
+-------------
+1. Analytical / Closed-Form Approach
+   - If a closed-form solution or estimator for x* exists, derive and explain it.
+   - Justify any assumptions or approximations used in the derivation.
+
+2. Simulation-Based Approach
+   - If a closed-form solution is not feasible or if additional verification is needed:
+     - Develop a simulation model that, for a given x, estimates the sample log likelihood G_m(x).
+     - Propose an optimization strategy (e.g., direct search, gradient-based methods, or other heuristic methods) to find the x that maximizes G_m(x) (or equivalently minimizes the negative log likelihood).
+     - You are allowed a limited budget of [BUDGET] objective function evaluations (default: 1000).
+   - Coding Instructions:
+     If you provide code, enclose it in one single fenced code block using:
+       
+       ```python
+       # ...your code...
+       ```
+       
+     Ensure the code:
+       - Generates random observations Y_j from the specified gamma distributions.
+       - Computes the log likelihood for a given x.
+       - Explores or optimizes x within the allowed [BUDGET].
+
+3. Performance Measures & Validation
+   - Report the estimated log likelihood and the corresponding parameter estimate x.
+   - If using simulation, provide variance estimates or confidence intervals for the log likelihood.
+   - Compare the performance of your proposed solution to a baseline (e.g., using the initial guess x = [1, 1]) to demonstrate improvement.
+
+Deliverables:
+-------------
+1. Solution Explanation
+   - Clearly explain the method used (closed-form derivation or simulation-based optimization), the resulting estimated parameter vector, and your justification.
+2. If Submitting Code
+   - Provide a single, self-contained, runnable Python code block that shows how the data is generated, the log likelihood is calculated, and x is optimized.
+3. Optimization Results
+   - Present the recommended estimate for x.
+   - Include numerical results such as the estimated log likelihood, confidence intervals, or other relevant metrics.
+
+Testing Notes:
+-------------
+- You have a budget of [BUDGET] (e.g., 1000 evaluations) for objective function computations.
+- Random candidate solutions for x can be generated uniformly in the square (0, 10) x (0, 10).
+- The evaluation will focus on how well your method recovers the parameter vector and improves over the baseline.
+
+Success Criteria:
+-----------------
+1. Feasibility: The estimated x must lie within the square (0, 10) x (0, 10).
+2. Demonstrated Improvement: The log likelihood obtained should be higher than that of trivial solutions (such as the starting guess x = [1, 1]).
+3. Justification: Provide sound reasoning and numerical evidence for your recommended estimate.
+
+Final Instructions:
+------------------
+- If using a simulation approach, explain your method and justify your choices.
+- If a closed-form or near-closed-form solution is derived, provide the derivation and validate it accordingly.

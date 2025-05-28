@@ -1,0 +1,122 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+------------------------------------------------------------------------------
+We have a single-stage, incapacitated manufacturing location facing stochastic demand over a planning horizon of n_days periods. The manufacturer can procure units via two different methods:
+
+1) A "regular" supplier, which costs cost_reg per unit and has a lead time of lead_reg days.
+2) An "expedited" supplier, which costs cost_exp per unit and has a shorter lead time of lead_exp days (often 0). We assume cost_exp > cost_reg.
+
+At each day n:
+- Demand d_n follows a normal distribution with mean mu and standard deviation st_dev.
+- If any on-hand inventory remains after satisfying demand, a holding cost is applied per remaining unit.
+- If demand exceeds on-hand inventory (i.e., backorder occurs), a penalty is applied per unit of unsatisfied demand.
+
+We keep track of two "order-up-to" levels (targets):
+- order_level_exp for expediting orders,
+- order_level_reg for regular orders.
+
+The system uses two separate inventory positions:
+- An expedited position, which considers inventory that will arrive quickly (in lead_exp days) plus any on-hand inventory.
+- A regular position, which considers inventory that will arrive in lead_reg days plus on-hand inventory, including anything that was expedited.
+
+The difference in lead times is l = lead_reg - lead_exp (assume l >= 1 for scenarios with a strictly longer regular lead time).
+
+When deciding on expedited orders, we only consider how much expedited inventory (on-hand plus due in lead_exp days) is available. The expedited order tries to bring the expedited position up to order_level_exp.  
+Similarly, the regular order tries to bring the regular position (on-hand plus all outstanding orders, including any expedited order placed today) up to order_level_reg.
+
+--------------------------------------------------------------------------------
+MODEL FACTORS
+--------------------------------------------------------------------------------
+Default values (which may be changed in your solution):
+- n_days: 1000  (number of days to simulate)
+- initial_inv: 40  (initial on-hand inventory)
+- cost_reg: 100.00  (regular cost per unit)
+- cost_exp: 110.00  (expedited cost per unit)
+- lead_reg: 110.00  (regular lead time in days)
+- lead_exp: 0       (expedited lead time in days)
+- holding_cost: 5.00   (cost per unit per day for holding inventory)
+- penalty_cost: 495.00 (cost per unit per day for backorders)
+- mu: 30.0    (mean demand per day)
+- st_dev: 10.0  (standard deviation of demand per day)
+- order_level_reg: 80
+- order_level_exp: 50
+
+--------------------------------------------------------------------------------
+OBJECTIVE
+--------------------------------------------------------------------------------
+Minimize the total expected daily cost, which is composed of:
+1) Holding costs
+2) Penalty (backorder) costs
+3) Ordering costs (regular + expedited)
+
+--------------------------------------------------------------------------------
+DECISION VARIABLES
+--------------------------------------------------------------------------------
+- order_level_reg (non-negative)
+- order_level_exp (non-negative)
+
+--------------------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------------------
+1. Analytical / Closed-Form Approach
+   - If you have an approach to derive an analytical solution or approximation, outline it.
+   - Include assumptions or any approximations you make in deriving such a solution.
+
+2. Simulation-Based Approach
+   - If a closed-form approach is not feasible or if you want to validate, set up a simulation:
+     * For each day n, simulate demand d_n ~ Normal(mu, st_dev).
+     * Track on-hand inventory, arrivals from past orders, and backlogs if any.
+     * Place expedited orders to restore the "expedited inventory position" to order_level_exp.
+     * Place regular orders to restore the "regular inventory position" to order_level_reg.
+     * Accumulate holding, penalty, and ordering costs.
+   - You have a budget [BUDGET] (e.g., 1000) for the number of replications or evaluations.
+   - If you provide code, include it in **one fenced code block** as follows:
+       ```python
+       # ...your code...
+       ```
+     so it can be extracted by regex. The code should:
+       * Generate random daily demands.
+       * Track outstanding orders, on-hand inventory, and shipments arriving.
+       * Calculate total daily cost (holding + penalty + ordering).
+       * Optionally, search or iterate over (order_level_exp, order_level_reg) to find a near-optimal solution within the provided [BUDGET].
+
+3. Performance Measures & Validation
+   - If simulating, estimate the mean daily cost for your proposed solution.
+   - Provide confidence intervals or variance estimates if possible.
+   - Compare your final proposed solution to a baseline (e.g., all regular or all expedited or a given pair of levels) to show improvement.
+
+--------------------------------------------------------------------------------
+DELIVERABLES
+--------------------------------------------------------------------------------
+1. Solution Explanation
+   - Whether you derive an approximate formula or run a simulation, clearly state how you arrived at your proposed (order_level_exp, order_level_reg) pair.
+
+2. If Submitting Code
+   - Use a single fenced code block with standard Python libraries only.
+   - Show how you generate demands, track inventories, handle orders, and compute costs.
+
+3. Final Results
+   - Provide the recommended values of order_level_exp and order_level_reg.
+   - Report the estimated (or calculated) total daily cost, or at least the decomposition into holding, penalty, and ordering costs.
+
+--------------------------------------------------------------------------------
+TESTING NOTES
+--------------------------------------------------------------------------------
+- We will test your solution with various budgets (e.g., 100, 500, 1000).
+- We may also vary the random seed to check robustness.
+- If using simulation, ensure your approach remains within the allocated budget of replications.
+
+--------------------------------------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------------------------------------
+1. Feasibility: order_level_exp >= 0, order_level_reg >= 0.
+2. Cost Minimization: The total daily cost should be lower than trivial solutions like setting both order levels very high or very low.
+3. Justification: Provide reasoning or numerical evidence that your chosen (order_level_exp, order_level_reg) is a good (near-optimal) solution.
+
+--------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+--------------------------------------------------------------------------------
+- If you opt for simulation, clearly explain your method and any sampling or search strategy.
+- If you have an analytical approach, derive it carefully and validate the assumptions.

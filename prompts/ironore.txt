@@ -1,0 +1,137 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+--------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+--------------------------------------------------------------------------------
+We have a mine that produces and sells an item (for instance, iron ore) on a spot market with a stochastic daily price P_t. Over T days:
+
+1) The daily price P_t follows a mean-reverting random walk with a specified min_price and max_price that truncate any extreme values.
+2) Each day, we may choose to produce up to m units, subject to:
+   - Per-unit production cost c
+   - Maximum storage capacity K
+   - Daily holding cost h per unit in inventory
+3) We can sell some or all inventory at the current day's price P_t.
+
+A strategy is defined by four thresholds:
+   x_1 = price above which we start (or continue) production,
+   x_2 = inventory level above which we stop production,
+   x_3 = price below which we stop production,
+   x_4 = price above which we sell all stock.
+
+The daily sequence is:
+  (a) Observe today's price P_t and current stock s_t.
+  (b) If we are currently producing:
+      - Stop production if P_t <= x_3 or s_t >= x_2.
+      - Otherwise, produce min(m, K - s_t) units at cost c each.
+  (c) If we are not producing, start production if P_t >= x_1 and s_t < x_2.
+  (d) If P_t >= x_4, sell all stock at that price.
+  (e) Pay holding cost h per unit of remaining inventory.
+
+--------------------------------------------------------------------------------
+SOURCES OF RANDOMNESS
+--------------------------------------------------------------------------------
+- P_t is generated via a mean-reverting random walk, truncated to lie between [min_price, max_price].
+- The drift term depends on (mu_0 - P_{t-1}) raised to the 1/4 power, adjusting the daily step.
+
+--------------------------------------------------------------------------------
+MODEL FACTORS (WITH DEFAULTS)
+--------------------------------------------------------------------------------
+- mean_price: e.g. 100.0
+- max_price: e.g. 200.0
+- min_price: e.g. 0.0
+- capacity (K): e.g. 10000
+- st_dev (sigma): e.g. 7.5
+- holding_cost (h): e.g. 1.0
+- prod_cost (c): e.g. 100.0
+- max_prod_perday (m): e.g. 100
+- price_prod (x_1): e.g. 80.0
+- inven_stop (x_2): e.g. 7000
+- price_stop (x_3): e.g. 40.0
+- price_sell (x_4): e.g. 100.0
+- n_days (T): e.g. 365
+
+--------------------------------------------------------------------------------
+RESPONSES
+--------------------------------------------------------------------------------
+- total_profit: cumulative profit over T days
+- frac_producing: fraction of days in which production takes place
+- mean_stock: average inventory level
+
+--------------------------------------------------------------------------------
+OPTIMIZATION PROBLEM
+--------------------------------------------------------------------------------
+We aim to maximize total_profit over T days.
+
+Decision variables:
+- x_1 = price_prod
+- x_2 = inven_stop
+- x_3 = price_stop
+- x_4 = price_sell
+
+Constraints:
+- x_1, x_2, x_3, x_4 >= 0
+- (Optionally, one could impose x_3 <= x_1 <= x_4, but that is not strictly enforced.)
+
+--------------------------------------------------------------------------------
+PROBLEM FACTORS
+--------------------------------------------------------------------------------
+- budget: maximum number of replications or evaluations if you are simulating (for example, 1000)
+
+--------------------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------------------
+1) Analytical / Closed-Form Approach
+   - If you can derive or approximate a solution for this threshold policy, explain your steps.
+
+2) Simulation-Based Approach
+   - If a closed-form solution is difficult, build a simulation that:
+     * Generates the daily price P_t via the mean-reverting random walk.
+     * Applies the threshold-based production and selling logic (x_1, x_2, x_3, x_4).
+     * Tracks production cost, holding cost, and sales revenue.
+     * Computes total_profit over T days.
+   - You have a budget [BUDGET] (e.g. 1000) to search or tune the thresholds x_1, x_2, x_3, x_4.
+   - If you include code, put it in a single fenced code block:
+
+       ```python
+       # ... your code ...
+       ```
+
+     so it can be extracted and run via regex.
+
+3) Performance Measures and Validation
+   - Provide a measure of variability or confidence intervals if you simulate.
+   - Compare to a baseline solution (for example, x_1=80, x_2=7000, x_3=40, x_4=100) or trivial solutions to show improvement.
+
+--------------------------------------------------------------------------------
+DELIVERABLES
+--------------------------------------------------------------------------------
+1) Method Explanation
+   - Describe how you handle the price process and threshold logic.
+
+2) Code (if submitted)
+   - One fenced Python block using standard libraries.
+   - Show how the price is generated and decisions are made.
+
+3) Results
+   - Report your chosen threshold values (x_1, x_2, x_3, x_4).
+   - Show estimated total_profit (and optionally frac_producing, mean_stock).
+
+--------------------------------------------------------------------------------
+TESTING NOTES
+--------------------------------------------------------------------------------
+- We may run your solution with n_days=365 or other lengths.
+- We will vary random seeds to check consistency.
+- If your solution uses simulation-based optimization, do not exceed [BUDGET] evaluations.
+
+--------------------------------------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------------------------------------
+1) Feasibility: x_1, x_2, x_3, x_4 >= 0
+2) Profit Improvement: Achieve higher profit than naive approaches (always produce or never produce).
+3) Justification: Provide data or derivations for why your chosen thresholds are near-optimal.
+
+--------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+--------------------------------------------------------------------------------
+- If using simulation, explain how you explore or optimize the decision variables.
+- If using an analytical or heuristic approach, detail the steps.

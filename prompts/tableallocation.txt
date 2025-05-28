@@ -1,0 +1,86 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+-------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+-------------------------------------------------------------------------------
+We have a restaurant that can seat up to "capacity" total customers at once. There are N different table sizes, each size c_i can accommodate up to c_i customers. The decision variable is num_tables = (x_1, x_2, ..., x_N), where x_i is how many tables of size c_i are used. The constraint is the sum over i of (x_i * c_i) <= capacity, meaning we cannot exceed the restaurant's total seating capacity.
+
+Customers arrive in groups of various sizes (from 1 up to max c_i) according to a Poisson process. The group arrival rates are given by lambda_j for each group size j. The service time for each group is exponential with a specified mean, and the revenue earned when seating a group of size j is a fixed amount table_revenue_j. If a group arrives and cannot find an available table that can seat them (i.e., all appropriately sized tables are occupied), that group immediately leaves, contributing no revenue.
+
+We simulate T hours (n_hour) of operation. Each group is seated at the smallest available table that can accommodate them. Once the group finishes (based on the exponential service time), the table becomes available for a new group. We collect total_revenue (the sum of all group revenues) and service_rate (the fraction of groups that are successfully seated).
+
+-------------------------------------------------------------------------------
+MODEL FACTORS (WITH DEFAULTS)
+-------------------------------------------------------------------------------
+- n_hour: 3
+- capacity: 80
+- table_cap: [2, 4, 6, 8]  (table sizes)
+- lambda: [3, 6, 3, 3, 2, 1.333..., 1.2, 1]  (arrival rates by group size)
+- service_time_means: [20, 25, 30, 35, 40, 45, 50, 60] in minutes
+- table_revenue: [15, 30, 45, 60, 75, 90, 105, 120] (revenue per group of size j)
+- num_tables: [10, 5, 4, 2] (initial guess for the count of each table type)
+
+-------------------------------------------------------------------------------
+OPTIMIZATION GOAL
+-------------------------------------------------------------------------------
+Maximize total expected revenue over the simulation period. The decision variables are num_tables = (x_1, x_2, ..., x_N), subject to the capacity constraint sum_i x_i * c_i <= capacity.
+
+-------------------------------------------------------------------------------
+REQUIREMENTS
+-------------------------------------------------------------------------------
+1) Analytical / Closed-Form Approach
+   - If you have a formula for how to allocate seats for Poisson arrivals of different group sizes, outline your derivation or approximations.
+
+2) Simulation-Based Approach
+   - If no closed-form solution is evident, set up a simulation:
+     * Over n_hour hours, generate arrival events for groups of various sizes j, with rates lambda_j.
+     * Seat each arriving group at the smallest available table that can accommodate them, or turn them away if no suitable table is available.
+     * Service times follow exponential distributions with means in service_time_means.
+     * Track total_revenue and service_rate (fraction of groups served).
+   - You have a budget [BUDGET] (for example, 1000) for how many configurations you can test or replicate.
+
+   - If you provide code, please place it in a single fenced block:
+
+       ```python
+       # ... code ...
+       ```
+
+   - The code should be self-contained and use standard libraries (like random or numpy).
+
+3) Performance Measures & Validation
+   - Report the total_revenue for your chosen table allocation and possibly the fraction of groups turned away.
+   - Compare your solution to a baseline (e.g., the initial guess of [10, 5, 4, 2]) and show improvement in revenue.
+
+-------------------------------------------------------------------------------
+DELIVERABLES
+-------------------------------------------------------------------------------
+1) Explanation of Approach
+   - Describe how you handle the multi-sized table logic and group assignment.
+   - Show how you handle capacity constraints if multiple table types exceed capacity.
+
+2) Code (if submitted)
+   - One fenced Python code block with standard libraries.
+
+3) Results
+   - Report your final recommended num_tables vector.
+   - Provide the estimated total_revenue and any additional metrics (e.g., service_rate).
+
+-------------------------------------------------------------------------------
+TESTING NOTES
+-------------------------------------------------------------------------------
+- We may test your code with different arrival rates or table capacities.
+- We'll vary random seeds to check consistency.
+- Stay within [BUDGET] simulation replications or evaluations of candidate solutions.
+
+-------------------------------------------------------------------------------
+SUCCESS CRITERIA
+-------------------------------------------------------------------------------
+1) Feasibility: sum_i num_tables[i] * table_cap[i] <= capacity
+2) Revenue Improvement: Achieve higher revenue than naive allocations (like all small tables or all big tables).
+3) Justification: Present data or rationale for your final allocation.
+
+-------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+-------------------------------------------------------------------------------
+- If you simulate, explain how you search for or refine the allocation.
+- If you have an approximate or heuristic approach, describe the assumptions.

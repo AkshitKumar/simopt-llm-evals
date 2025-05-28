@@ -1,0 +1,83 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+Objective:
+----------
+Minimize the average Elo difference between matched players, subject to the constraint that the average waiting time does not exceed a specified threshold delta (or upper_time).
+
+Problem Description:
+--------------------
+We have an online chess platform where players arrive according to a stationary Poisson process with rate lambda. Each player has an Elo rating drawn from a truncated normal distribution with mean 1200 and standard deviation:
+  
+  1200 / ( sqrt(2) * erfcinv( 1/50 ) ).
+
+This distribution is truncated at 0 and 2400, giving approximately 0 as the 1st percentile and 2400 as the 99th percentile.
+
+When a new player arrives, the platform attempts to match them with a waiting player whose Elo rating differs by at most x (the "allowable_diff" parameter). If no such waiting player exists, they join the waiting pool until a new arrival (or an existing waiting player) matches with them. We simulate the process for num_players players.
+
+Model Factors (Defaults):
+-------------------------
+- elo_mean = 1200.0
+- elo_sd = 1200 / ( sqrt(2) * special.erfcinv( 1/50 ) )
+- poisson_rate = 1.0
+- num_players = 1000
+- allowable_diff = 150.0 (default matching threshold)
+- delta (average waiting time upper bound) = 5.0
+
+Responses:
+----------
+1) avg_diff: The average Elo difference between all matched pairs.
+2) avg_wait_time: The average waiting time to get matched.
+
+Requirements:
+-------------
+1) Analytical / Closed-Form Approach
+   - If possible, derive or approximate an analytical expression for the average Elo difference under a given matching threshold x, subject to the arrival rate and rating distribution. Discuss any assumptions or simplifying approximations.
+
+2) Simulation-Based Approach
+   - If an analytical formula is difficult, develop a simulation:
+     * Generate num_players ratings from the truncated normal distribution.
+     * Players arrive according to a Poisson process with rate lambda.
+     * Use a matching policy that pairs any new arrival with a waiting player whose rating is within x, if such a player exists.
+     * Record the waiting times and the Elo differences for each matched pair.
+   - You have a budget [BUDGET] (e.g., 1000) for how many candidate x values you can test or how many simulations you can run.
+
+3) Performance Measures & Validation
+   - The main objective is to minimize avg_diff.
+   - However, we also have a constraint: avg_wait_time <= delta (or some upper_time threshold).
+   - Compare your final solution to baseline x=150 or other naive thresholds to show improvement.
+
+Deliverables:
+-------------
+1) Solution Explanation
+   - Summarize how you decide an optimal or near-optimal allowable_diff (x).
+   - If you use a simulation approach, explain your search or optimization strategy within the [BUDGET] limit.
+
+2) Code (if provided)
+   - Put it in a single fenced block:
+
+       ```python
+       # ... your code ...
+       ```
+
+   - Must be self-contained, using only standard libraries (e.g., random, numpy).
+
+3) Results
+   - Recommend an allowable_diff value.
+   - Report the resulting avg_diff and avg_wait_time, plus any confidence intervals or variance estimates.
+
+Testing Notes:
+--------------
+- We will test your approach with different budgets (100, 500, 1000).
+- We may also vary the arrival rate lambda or the rating distribution slightly.
+- If you simulate, ensure it runs within feasible time for the given number of players.
+
+Success Criteria:
+----------------
+1) Feasibility: The solution respects 0 <= x <= 2400.
+2) Constrained: The average wait time must be <= delta.
+3) Improvement: The average Elo difference is reduced compared to naive solutions like x=150, while meeting wait time constraints.
+
+Final Instructions:
+------------------
+- If an analytical approach is too complex, propose heuristics or approximate solutions.
+- If simulating, detail your method for generating arrivals and ratings, matching logic, and measuring performance.

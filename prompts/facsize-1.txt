@@ -1,0 +1,92 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+--------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+--------------------------------------------------------------------------------
+We have m facilities, each with a chosen capacity x_i >= 0, for i=1,...,m. A random demand vector Xi = (Xi_1, ..., Xi_m) arrives, drawn from a multivariate normal distribution with a specified mean vector mu and covariance matrix Sigma. The components of Xi may be positively correlated, meaning high demand at one facility often coincides with high demand at another.
+
+A "stockout" occurs if, for at least one facility i, the actual demand Xi_i exceeds the installed capacity x_i. We denote:
+- P_stockout(x) = Probability that Xi_i > x_i for one or more i.
+
+Objectives and Constraints:
+1) Decision Variables: The capacities x = (x_1, ..., x_m), each x_i >= 0.
+2) Objective: Minimize total installation cost = sum_{i=1..m} c_i * x_i, where c_i is the unit cost for capacity at facility i.
+3) Constraint: P_stockout(x) <= epsilon, i.e., the probability of a stockout is at most epsilon. 
+4) (Optional) Additional bounds on x_i (like 0 <= x_i < infinity or any practical upper limit).
+
+You are allowed up to [BUDGET] evaluations or replications if you choose to solve this via simulation or a sampling-based approach. The default budget might be 10000.
+
+--------------------------------------------------------------------------------
+MODEL FACTORS (DEFAULTS)
+--------------------------------------------------------------------------------
+- m = 3 (number of facilities)
+- mu (mean demand) = [100, 100, 100]
+- Sigma (covariance matrix) = [[2000, 1500, 500],
+                              [1500, 2000, 750],
+                              [500,  750,  2000]]
+- capacity (initial guess) = [150, 300, 400]
+- cost coefficients (c_i) = [1, 1, 1]
+- epsilon (Version 1 risk parameter) = 0.05
+- BUDGET = 10000
+
+--------------------------------------------------------------------------------
+RESPONSES
+--------------------------------------------------------------------------------
+- stockout_flag: 0 if no stockout occurs, 1 if at least one facility fails to satisfy demand in a single realization.
+- n_stockout: number of facilities that stock out in a single realization.
+- n_cut: total shortfall across all facilities in a single realization.
+
+--------------------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------------------
+1. Analytical or Closed-Form Approach
+   - If you can derive an analytical solution or an approximation for the multivariate normal probability constraints, outline your assumptions and derivations.
+
+2. Simulation / Sampling-Based Approach
+   - If no closed form is practical, propose a simulation or sampling procedure:
+     * Generate demands from the specified multivariate normal distribution.
+     * Check how often total demand at each facility i exceeds capacity x_i.
+     * Estimate P_stockout(x).
+   
+3. Performance Measures & Validation
+   - If simulating, provide confidence intervals or error estimates of P_stockout(x).
+   - Compare your final approach to a baseline solution (e.g., no capacity or an arbitrarily large capacity) to demonstrate improvement or feasibility.
+
+--------------------------------------------------------------------------------
+DELIVERABLES
+--------------------------------------------------------------------------------
+1. Solution Explanation
+   - Clearly state your method (analytical or simulation-based).
+   - If simulation-based, specify how you generate demands, evaluate constraints, and search for an optimal or near-optimal x.
+
+2. If Submitting Code
+   - Provide code in a single fenced code block:
+       ```python
+       # your code here
+       ```
+     so it can be automatically extracted.
+   - The code should be self-contained, using standard Python libraries (random, numpy, etc.).
+
+3. Final Results
+   - Provide the capacity vector x that satisfies P_stockout(x) <= epsilon at minimal cost, and give an estimate of that cost.
+--------------------------------------------------------------------------------
+TESTING NOTES
+--------------------------------------------------------------------------------
+- We will test solutions with different budgets [BUDGET], e.g., 1000, 5000, 10000.
+- We may vary random seeds to confirm robustness.
+- If using simulation, be mindful of runtime constraints.
+
+--------------------------------------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------------------------------------
+1. Feasibility: 
+   - Version 1: P_stockout(x) <= epsilon
+2. Improvement vs. Baselines: 
+   - Version 1: Lower cost than naive solutions that trivially exceed the probability constraint.
+3. Justification: Provide numerical or derivational evidence that your proposed x is competitive or near-optimal.
+
+--------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+--------------------------------------------------------------------------------
+- If you opt for simulation, clarify how you approximate probabilities and search over x.
+- If an analytical approximation is used, justify the approximations carefully.

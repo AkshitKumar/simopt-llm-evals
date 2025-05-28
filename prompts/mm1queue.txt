@@ -1,0 +1,93 @@
+You're an expert in stochastic modeling and you're tasked to solve the following problem.
+
+-------------------------------------------------------------------------------
+PROBLEM DESCRIPTION
+-------------------------------------------------------------------------------
+We have a single-server queue where arrivals occur according to an exponential process with rate lambda, and service times are exponentially distributed with rate mu. Customers queue up if the server is busy. We simulate a certain number of customers (with a warmup period) to estimate:
+
+1) avg_sojourn_time: average time a customer spends in the system (waiting + service).
+2) avg_waiting_time: average time a customer waits before service.
+3) frac_cust_wait: fraction of customers who wait at all.
+
+-------------------------------------------------------------------------------
+MODEL FACTORS (DEFAULTS)
+-------------------------------------------------------------------------------
+- lambda = 1.5   (rate of arrivals)
+- mu = 3.0       (rate of service)
+- warmup = 50    (number of customers for warmup, not included in final statistics)
+- people = 200   (number of customers on which to compute averages)
+
+-------------------------------------------------------------------------------
+OPTIMIZATION GOAL
+-------------------------------------------------------------------------------
+We want to choose mu (the service rate) to minimize:
+   E[ avg_sojourn_time ] + c * (mu^2)
+where c is a given penalty cost per squared rate of service. The only constraint is that mu >= 0.
+
+-------------------------------------------------------------------------------
+PROBLEM FACTORS
+-------------------------------------------------------------------------------
+- cost (c): e.g., 0.1 (penalty multiplier for mu^2)
+- budget (max replications/evaluations): e.g., 1000
+- starting solution: mu = 3.0
+- random solutions can be generated, for example, from an exponential distribution with mean 3.
+
+-------------------------------------------------------------------------------
+REQUIREMENTS
+-------------------------------------------------------------------------------
+1) Analytical / Closed-Form Approach
+   - If you know a formula or approximation for the average sojourn time in an M/M/1 system (for example, 1 / (mu - lambda)), you might incorporate the penalty c*(mu^2) and find mu that minimizes that expression. If you do so, show your derivation or approximations.
+
+2) Simulation-Based Approach
+   - If you want to confirm or refine a solution, or if you do not rely on the closed-form, set up a simulation:
+     * Generate interarrival times via an exponential distribution with rate lambda.
+     * Generate service times via an exponential distribution with rate mu.
+     * Track each customer's time in system (arrival to departure) and waiting time.
+     * Exclude the first warmup customers from the final statistics.
+   - Then define an objective function = (simulated average sojourn time) + c*(mu^2).
+   - You have a budget [BUDGET] for the number of times you can simulate or evaluate a candidate mu.
+
+3) Performance Measures & Validation
+   - If you simulate, provide confidence intervals or an estimate of variability.
+   - Compare the proposed mu to a baseline (for example, mu=3.0) to demonstrate improvement in the objective.
+
+-------------------------------------------------------------------------------
+DELIVERABLES
+-------------------------------------------------------------------------------
+1) Explanation of Method
+   - If using an analytical approach, detail how you incorporate the queueing formulas and the mu^2 penalty.
+   - If simulating, explain how you generate arrivals, handle queue logic, track times, and compute the objective function.
+
+2) Code (if any)
+   - Provide a single fenced code block:
+
+       ```python
+       # ... your code ...
+       ```
+
+     so it can be extracted by regex. The code should use standard Python libraries only.
+
+3) Results
+   - Present your recommended service rate mu.
+   - Report the estimated average sojourn time and the penalty cost c*(mu^2), plus the total objective value.
+
+-------------------------------------------------------------------------------
+TESTING NOTES
+-------------------------------------------------------------------------------
+- We will test solutions with different budgets (for example, 100, 500, 1000).
+- We may vary lambda, c, or the random seed.
+- If you simulate, keep each run within [BUDGET] replications.
+
+-------------------------------------------------------------------------------
+SUCCESS CRITERIA
+-------------------------------------------------------------------------------
+1) Feasibility: mu >= 0.
+2) Low Objective Value: E[ avg_sojourn_time ] + c*(mu^2) is better than naive solutions (like mu=3.0, or mu= lambda + 0.01).
+3) Justification: Provide numerical evidence or derivations supporting your solution.
+
+-------------------------------------------------------------------------------
+FINAL INSTRUCTIONS
+-------------------------------------------------------------------------------
+- Do not reveal a known "optimal" solution; none is provided here explicitly.
+- If you use a queueing formula, justify the conditions (mu > lambda, etc.).
+- If you simulate, detail how you search for or refine mu within the given budget.
